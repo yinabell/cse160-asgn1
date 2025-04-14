@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Draw a blue rectangle (canvas version)</title>
+    </head>
+
+    <body onload="main()">
+        <canvas id="example" width="400" height="400">
+        Please use a browser that supports "canvas"
+        </canvas>
+        <script src="asgn1.js"></script>
+        
+        <!-- load downloaded provided matrix library -->
+        <script src="../lib/cuon-matrix-cse160.js"></script> 
+
+        <!-- vector 1 HERE -->
+         <p></p> <!-- new line -->
+
+        vector 1: 
+        <p></p> <!-- new line -->
+        x: <input type = "number" id = "x1"> 
+        y: <input type = "number" id = "y1"> 
+
+
+
+        <!-- vector 2 HERE -->
+        <p></p> <!-- new line -->
+
+        vector 2: 
+        <p></p> <!-- new line -->
+        x: <input type = "number" id = "x2"> 
+        y: <input type = "number" id = "y2"> 
+
+        <input type="submit" value="Draw" id = "button"> 
+
+        <p></p> <!-- new line -->
+        Operation: 
+        <select id = "dropdown">
+            <option value = "add" >Add</option>
+            <option value = "sub" >Sub</option>
+            <option value = "mul" >Mul</option>
+            <option value = "div" >Div</option>
+            <option value = "mag" >Magnitude</option>
+            <option value = "norm" >Normalize</option>
+            <option value = "ang" >Visualize Angle</option>
+            <option value = "area" >Area</option>
+
+        </select>
+
+        Scalar: <input type = "number" id = "scalar"> 
+        <input type="submit" value="Perform Operation" id = "button2"> 
+
+    </body>
+
+</html> 
