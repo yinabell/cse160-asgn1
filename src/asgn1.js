@@ -1,205 +1,106 @@
-// DrawRectangle.js
+// ColoredPoint.js (c) 2012 matsuda
+// Vertex shader program
+var VSHADER_SOURCE = `
+  attribute vec4 a_Position; 
+  void main() {
+    gl_Position = a_Position;
+    gl_PointSize = 10.0;
+  }`
+
+// Fragment shader program
+var FSHADER_SOURCE = `
+  precision mediump float;
+  uniform vec4 u_FragColor;
+  void main() {
+    gl_FragColor = u_FragColor;
+  }` 
+
+// global variables
+let canvas; 
+let gl; 
+let a_Position; 
+let u_FragColor; 
+
+function setupWebGL(){
+    // Retrieve <canvas> element
+  var canvas = document.getElementById('webgl');
+
+  // Get the rendering context for WebGL
+  var gl = getWebGLContext(canvas);
+  if (!gl) {
+    console.log('Failed to get the rendering context for WebGL');
+    return;
+  }
+}
+
 function main() {
-// Retrieve <canvas> element <- (1)
+  
+  setupWebGL(); 
 
-    var canvas = document.getElementById('example');
-    if (!canvas) {
-        console.log('Failed to retrieve the <canvas> element');
-        return;
-    }
+  // Initialize shaders
+  if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+    console.log('Failed to intialize shaders.');
+    return;
+  }
 
-    // Get the rendering context for 2DCG <- (2)
-    var ctx = canvas.getContext('2d'); 
+  // // Get the storage location of a_Position
+  var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  if (a_Position < 0) {
+    console.log('Failed to get the storage location of a_Position');
+    return;
+  }
 
-    // Draw a blue rectangle <- (3)
-    ctx.fillStyle = 'rgba(0, 0, 0, 1.0)'; // set to black
-    ctx.fillRect(0, 0, 400, 400); // Fill a rectangle with the color
+  // Get the storage location of u_FragColor
+  var u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+  if (!u_FragColor) {
+    console.log('Failed to get the storage location of u_FragColor');
+    return;
+  }
 
-    // NOT DYNAMIC
-    //var v1 = new Vector3([2.25, 2.25, 0]); 
-    //drawVector(ctx, v1, "red"); 
+  // Register function (event handler) to be called on a mouse press
+  canvas.onmousedown = function(ev){ click(ev, gl, canvas, a_Position, u_FragColor) };
 
-    document.getElementById('button').addEventListener('click', function(){ 
+  // Specify the color for clearing <canvas>
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-        handleDrawEvent(ctx); 
-
-        }
-
-    );
-
-    document.getElementById('button2').addEventListener('click', function(){ 
-
-        handleDrawOperationEvent(ctx); 
-
-        }
-
-    );
-} 
-
-// drawVector(v, color) 
-function drawVector(canvas, vector, color){ 
-
-    // scale = 20 
-    var x = vector.elements[0] * 20; 
-    var y = vector.elements[1] * 20; 
-
-    // color 
-    canvas.strokeStyle = color; 
-
-    // pen down 
-    canvas.beginPath(); 
-
-    // move pen to center 
-    canvas.moveTo(200, 200); 
-
-    // line length 
-    canvas.lineTo(200 + x, 200 - y); 
-
-    // draw 
-    canvas.stroke(); 
-
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT);
 }
 
-// handleDrawEvent() 
-function handleDrawEvent(canvas){ 
+var g_points = [];  // The array for the position of a mouse press
+var g_colors = [];  // The array to store the color of a point
+function click(ev, gl, canvas, a_Position, u_FragColor) {
+  var x = ev.clientX; // x coordinate of a mouse pointer
+  var y = ev.clientY; // y coordinate of a mouse pointer
+  var rect = ev.target.getBoundingClientRect();
 
-    // clear canvas 
-    canvas.clearRect(0, 0, 400, 400); 
-    canvas.fillStyle = 'rgba(0, 0, 0, 1.0)'; 
-    canvas.fillRect(0, 0, 400, 400);  
+  x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
+  y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
 
-    // grab input from HTML 
-    var x1 = document.getElementById('x1').value;
-    var y1 = document.getElementById('y1').value;
+  // Store the coordinates to g_points array
+  g_points.push([x, y]);
+  // Store the coordinates to g_points array
+  if (x >= 0.0 && y >= 0.0) {      // First quadrant
+    g_colors.push([1.0, 0.0, 0.0, 1.0]);  // Red
+  } else if (x < 0.0 && y < 0.0) { // Third quadrant
+    g_colors.push([0.0, 1.0, 0.0, 1.0]);  // Green
+  } else {                         // Others
+    g_colors.push([1.0, 1.0, 1.0, 1.0]);  // White
+  }
 
-    var v1 = new Vector3([x1, y1, 0]); 
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT);
 
-    drawVector(canvas, v1, "red"); 
+  var len = g_points.length;
+  for(var i = 0; i < len; i++) {
+    var xy = g_points[i];
+    var rgba = g_colors[i];
 
-    // grab input from HTML 
-    var x2 = document.getElementById('x2').value;
-    var y2 = document.getElementById('y2').value;
-
-    var v2 = new Vector3([x2, y2, 0]); 
-
-    drawVector(canvas, v2, "blue"); 
-}
-
-// handleDrawOperationEvent() 
-function handleDrawOperationEvent(canvas){ 
-    
-    // clear canvas 
-    canvas.clearRect(0, 0, 400, 400); 
-    canvas.fillStyle = 'rgba(0, 0, 0, 1.0)'; 
-    canvas.fillRect(0, 0, 400, 400);  
-
-    // grab input from HTML 
-    var x1 = document.getElementById('x1').value;
-    var y1 = document.getElementById('y1').value;
-
-    var v1 = new Vector3([x1, y1, 0]); 
-
-    drawVector(canvas, v1, "red"); 
-
-    // grab input from HTML 
-    var x2 = document.getElementById('x2').value;
-    var y2 = document.getElementById('y2').value;
-
-    var v2 = new Vector3([x2, y2, 0]); 
-
-    drawVector(canvas, v2, "blue"); 
-
-    // grab input from HTML 
-    var scale = document.getElementById('scalar').value; 
-    var op = document.getElementById('dropdown').value; 
-
-    if (op == 'add'){ 
-
-        var v3 = new Vector3(v1.elements).add(v2); 
-        drawVector(canvas, v3, "green"); 
-
-        return;
-
-    }
-
-    if (op == 'sub'){ 
-
-        var v3 = new Vector3(v1.elements).sub(v2); 
-        drawVector(canvas, v3, "green"); 
-
-        return;
-
-    }
-
-    if (op == 'mul'){ 
-
-        var v3 = new Vector3(v1.elements).mul(scale); 
-        var v4 = new Vector3(v2.elements).mul(scale); 
-        drawVector(canvas, v3, "green"); 
-        drawVector(canvas, v4, "green"); 
-
-        return;
-
-    }
-
-    if (op == 'div'){ 
-
-        var v3 = new Vector3(v1.elements).div(scale); 
-        var v4 = new Vector3(v2.elements).div(scale); 
-        drawVector(canvas, v3, "green"); 
-        drawVector(canvas, v4, "green"); 
-
-        return;
-
-    }
-
-    if (op == 'mag'){ 
-
-        v1.magnitude();
-        v2.magnitude();
-
-        return;
-
-    }
-
-    if (op == 'norm'){ 
-
-        var v3 = new Vector3(v1.elements).normalize(); 
-        var v4 = new Vector3(v2.elements).normalize(); 
-        drawVector(canvas, v3, "green"); 
-        drawVector(canvas, v4, "green"); 
-
-        return;
-
-    }
-
-    if (op == 'ang'){ 
-
-        // dot product of v1 and v2
-        var d = Vector3.dot(v1, v2);
-        var m1 = v1.magnitude();
-        var m2 = v2.magnitude();
-        var angle = Math.acos(d / (m1 * m2)) * (180/Math.PI);
-
-        console.log("Angle is ", angle);
-
-        return;
-
-    }
-
-    if (op == 'area'){ 
-
-        // cross product of v1 and v2
-        var c = Vector3.cross(v1, v2);
-        
-        var area = c.magnitude()/2;
-
-        console.log("Area is ", area);
-
-        return;
-
-    }
-
-    //comment
-
+    // Pass the position of a point to a_Position variable
+    gl.vertexAttrib3f(a_Position, xy[0], xy[1], 0.0);
+    // Pass the color of a point to u_FragColor variable
+    gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+    // Draw
+    gl.drawArrays(gl.POINTS, 0, 1);
+  }
 }
