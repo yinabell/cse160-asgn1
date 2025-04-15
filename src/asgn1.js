@@ -28,6 +28,7 @@ let g_selectedColor = [1,1,1,1];
 let g_selectedSize = 5;
 let g_selectedType = 0;
 let g_selectedSegments = 12;
+let g_Opacity = 100;
 
 function setupWebGL(){
     // Retrieve <canvas> element
@@ -40,6 +41,9 @@ function setupWebGL(){
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
 function connectVariablesToGLSL(){
@@ -106,6 +110,10 @@ function addActionsforHtmlUI(){
         g_selectedSegments = this.value;
         //console.log("is this working now here");
     });
+    document.getElementById('opacitySlide').addEventListener('mouseup', function(){
+        g_Opacity = this.value;
+        //console.log("is this working now here");
+    });
 }
 
 function main() {
@@ -139,14 +147,16 @@ var g_colors = [];  // The array to store the color of a point
 function click(ev){
     let [x,y] = convertCoordinatesEventToGL(ev);
     let point;
-    
+
     if(g_selectedType == 0){
         point = new Point();
+
     }else if(g_selectedType == 1){
         point = new Triangle();
     }else if(g_selectedType == 2){
         point = new Circle();
     }
+    point.opacity = g_Opacity;
     point.position = [x, y];
     point.color = g_selectedColor.slice();
     point.size = g_selectedSize;

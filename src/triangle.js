@@ -1,31 +1,29 @@
 class Triangle{
 
     constructor(){
-
         this.type = 'triangle';
         this.position = [0.0, 0.0, 0.0];
         this.color = [1,1,1,1];
         this.size = 5;
-
+        this.opacity = 100;
     }
 
     render(){
-
         var xy = this.position;
         var rgba = this.color;
         var size = this.size;
-        gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+        var opacity = this.opacity/100;
+
+        gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], opacity);
         gl.uniform1f(u_Size, size);
 
         // Draw
         var d = this.size/200;
         drawTriangle([xy[0]-d/2, xy[1]-d/2, xy[0]+d/2, xy[1]-d/2, xy[0], xy[1]+d/2]);
-
     }
 }
 
 function drawTriangle(vertices){
-
     var n = 3;
     var vertexBuffer = gl.createBuffer();
 
@@ -39,5 +37,4 @@ function drawTriangle(vertices){
     gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(a_Position);
     gl.drawArrays(gl.TRIANGLES, 0, n);
-
 }
